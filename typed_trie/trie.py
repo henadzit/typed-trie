@@ -16,9 +16,6 @@ class TrieNode(Generic[T]):
         self.value = value
         self.children: dict[str, TrieNode[T | _Unset]] = {}
 
-    def __repr__(self):
-        return f"TrieNode({self.key}, {self.value})"
-
     def __str__(self):
         return f"TrieNode({self.key}, {self.value})"
 
@@ -26,12 +23,6 @@ class TrieNode(Generic[T]):
 class Trie(Generic[T]):
     def __init__(self):
         self.root = TrieNode[T | _Unset]("", UNSET)
-
-    def __repr__(self):
-        return f"Trie({self.root})"
-
-    def __str__(self):
-        return f"Trie({self.root})"
 
     def insert(self, key: str, value: T):
         node = self.root
