@@ -33,6 +33,13 @@ class Trie(Generic[T]):
         node.value = value
 
     def search(self, key: str) -> T:
+        return cast(T, self._find_node(key).value)
+
+    def delete(self, key: str):
+        node = self._find_node(key)
+        node.value = UNSET
+
+    def _find_node(self, key: str) -> TrieNode[T | _Unset]:
         node = self.root
         for char in key:
             if char not in node.children:
@@ -42,12 +49,4 @@ class Trie(Generic[T]):
         if node.value is UNSET:
             raise KeyError(key)
 
-        return cast(T, node.value)
-
-    def delete(self, key: str):
-        node = self.root
-        for char in key:
-            if char not in node.children:
-                return
-            node = node.children[char]
-        node.value = UNSET
+        return node

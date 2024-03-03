@@ -62,3 +62,11 @@ def test_delete(inserts: list[tuple[str, str]], delete: str):
 
     with pytest.raises(KeyError):
         trie.search(delete)
+
+
+def test_delete_not_found():
+    trie = Trie()
+    trie.insert("b", "1")
+
+    with pytest.raises(KeyError):
+        trie.delete("a")
