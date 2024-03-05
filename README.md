@@ -8,17 +8,14 @@ A pure Python implementation of [trie](https://en.wikipedia.org/wiki/Trie) with 
 >>> from typed_trie import Trie
 >>>
 >>> trie = Trie()
->>> trie.insert("how to cook", 1)
->>> trie.insert("how to swim", 2)
->>> trie.search("how to cook")
-1
->>> trie.delete("how to cook")
->>> trie.search("how to cook")
-...
-    raise KeyError(key)
-KeyError: 'how to cook'
+>>> trie["how to cook"] = 1
+>>> trie["how to swim"] = 2
+>>> trie["who is john doe"] = 3
+>>> list(trie.items_by_prefix("how to"))
+[('how to cook', 1), ('how to swim', 2)]
+>>> del trie["how to cook"]
 ```
 
 ## License
 
-`repipe` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`typed-trie` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

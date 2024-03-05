@@ -1,3 +1,4 @@
+from collections.abc import MutableMapping
 from typing import cast, TypeVar, Generic
 
 T = TypeVar("T")
@@ -11,33 +12,59 @@ UNSET = _Unset()
 
 
 class TrieNode(Generic[T]):
-    def __init__(self, key: str, value: T | _Unset):
-        self.key = key
+
+    def __init__(self, value: T | _Unset):
         self.value = value
-        self.children: dict[str, TrieNode[T | _Unset]] = {}
+        self.children: dict[str, TrieNode[T]] = {}
 
-    def __str__(self):
-        return f"TrieNode({self.key}, {self.value})"
+    def iterate(self, prefix: str):
+        stack: list[tuple[str, TrieNode[T]]] = [(prefix, self)]
+
+        while stack:
+            current_prefix, node = stack.pop()
+
+            if node.value is not UNSET:
+                yield current_prefix, node.value
+
+            # reverse to preserver the insert order
+            for char, child in reversed(node.children.items()):
+                stack.append((current_prefix + char, child))
 
 
-class Trie(Generic[T]):
+class Trie(MutableMapping[str, T]):
     def __init__(self):
-        self.root = TrieNode[T | _Unset]("", UNSET)
+        self.root = TrieNode[T | _Unset](UNSET)
 
-    def insert(self, key: str, value: T):
+    def __setitem__(self, key: str, value: T):
         node = self.root
         for char in key:
             if char not in node.children:
-                node.children[char] = TrieNode[T | _Unset](char, UNSET)
+                node.children[char] = TrieNode[T | _Unset](UNSET)
             node = node.children[char]
         node.value = value
 
-    def search(self, key: str) -> T:
+    def __getitem__(self, key: str) -> T:
         return cast(T, self._find_node(key).value)
 
-    def delete(self, key: str):
+    def __delitem__(self, key: str):
         node = self._find_node(key)
         node.value = UNSET
+
+    def items_by_prefix(self, prefix: str = ""):
+        node = self._try_finding_node(prefix)
+
+        if node is None:
+            return
+
+        yield from node.iterate(prefix)
+
+    def keys_by_prefix(self, prefix: str = ""):
+        for key, _ in self.items_by_prefix(prefix):
+            yield key
+
+    def values_by_prefix(self, prefix: str = ""):
+        for _, value in self.items_by_prefix(prefix):
+            yield value
 
     def _find_node(self, key: str) -> TrieNode[T | _Unset]:
         node = self.root
@@ -50,3 +77,18 @@ class Trie(Generic[T]):
             raise KeyError(key)
 
         return node
+
+    def _try_finding_node(self, key: str) -> TrieNode[T | _Unset] | None:
+        node = self.root
+        for char in key:
+            if char not in node.children:
+                return None
+            node = node.children[char]
+
+        return node
+
+    def __iter__(self):
+        yield from self.keys_by_prefix()
+
+    def __len__(self):
+        return sum(1 for _ in self)
