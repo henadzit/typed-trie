@@ -26,7 +26,7 @@ class TrieNode(Generic[T]):
             if node.value is not UNSET:
                 yield current_prefix, node.value
 
-            # reverse to preserver the insert order
+            # reverse to preserve the insert order
             for char, child in reversed(node.children.items()):
                 stack.append((current_prefix + char, child))
 
@@ -47,8 +47,20 @@ class Trie(MutableMapping[str, T]):
         return cast(T, self._find_node(key).value)
 
     def __delitem__(self, key: str):
-        node = self._find_node(key)
+        node = self.root
+        stack: list[tuple[str, TrieNode[T | _Unset]]] = [("", node)]
+        for char in key:
+            if char not in node.children:
+                raise KeyError(key)
+            node = node.children[char]
+            stack.append((char, node))
+
+        if node.value is UNSET:
+            raise KeyError(key)
+
         node.value = UNSET
+
+        self._cleanup(stack)
 
     def items_by_prefix(self, prefix: str = ""):
         node = self._try_finding_node(prefix)
@@ -92,3 +104,16 @@ class Trie(MutableMapping[str, T]):
 
     def __len__(self):
         return sum(1 for _ in self)
+
+    def _cleanup(self, stack: list[tuple[str, TrieNode[T | _Unset]]]):
+        child_char = None
+        while stack:
+            char, node = stack.pop()
+
+            if child_char is not None:
+                del node.children[child_char]
+
+            if node.children or node.value is not UNSET:
+                break
+
+            child_char = char

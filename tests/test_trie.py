@@ -47,6 +47,8 @@ def test_search_not_found(inserts: list[tuple[str, str]], search: str):
     "inserts, delete",
     [
         ([("a", "1")], "a"),
+        ([("ab", "1")], "ab"),
+        ([("abc", "1")], "abc"),
         ([("a", "1"), ("ab", "2")], "ab"),
         ([("a", "1"), ("ab", "2")], "a"),
         ([("a", "1"), ("ab", "2"), ("ac", "3")], "ab"),
