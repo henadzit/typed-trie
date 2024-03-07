@@ -2,6 +2,10 @@
 
 A pure Python implementation of [trie](https://en.wikipedia.org/wiki/Trie) with typing.
 
+## Install
+
+`pip install typed-trie` or `poetry add typed-trie`.
+
 ## Usage
 
 ```
